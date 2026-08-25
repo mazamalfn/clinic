@@ -40,6 +40,44 @@ export const getAllAppointments = async (req, res, next) => {
   }
 };
 
+export const getWaitingQueue = async (req, res, next) => {
+  try {
+    const { medecin_id } = req.query;
+
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+
+    let query = supabase
+      .from('appointments')
+      .select(`
+        id,
+        date_heure,
+        statut,
+        patients (id, nom, prenom, telephone),
+        users!appointments_medecin_id_fkey (id, nom)
+      `)
+      .in('statut', ['en_attente', 'en_cours', 'planifie'])
+      .gte('date_heure', startDate.toISOString())
+      .lte('date_heure', endDate.toISOString())
+      .order('date_heure', { ascending: true });
+
+    if (medecin_id) query = query.eq('medecin_id', medecin_id);
+
+    const { data: queue, error } = await query;
+    if (error) throw error;
+
+    res.json({
+      message: 'File d attente de la journée récupérée',
+      queue,
+      count_en_attente: (queue || []).filter((q) => q.statut === 'en_attente').length,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getAppointmentById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -94,6 +132,9 @@ export const createAppointment = async (req, res, next) => {
       .single();
 
     if (error) {
+      if (error.code === '23P01' || error.message?.includes('overlap')) {
+        return res.status(409).json({ error: 'Collision de rendez-vous : le médecin est déjà réservé sur ce créneau horaire.' });
+      }
       return res.status(500).json({ error: 'Erreur de création du rendez-vous', details: error.message });
     }
 

@@ -1,5 +1,28 @@
 import { supabase } from '../config/supabase.js';
 
+/**
+ * Masquage du Secret Médical pour le rôle Secrétaire
+ */
+const maskMedicalSecrecy = (consultation, userRole) => {
+  if (userRole !== 'secretaire' || !consultation) return consultation;
+
+  return {
+    ...consultation,
+    diagnostic: '[Masqué - Secret Médical]',
+    notes: '[Masqué - Secret Médical]',
+    prescriptions: consultation.prescriptions ? consultation.prescriptions.map(p => ({
+      ...p,
+      prescription_items: p.prescription_items ? p.prescription_items.map(pi => ({
+        ...pi,
+        medicament: '[Masqué - Secret Médical]',
+        dosage: '[Masqué]',
+        frequence: '[Masqué]',
+        duree: '[Masqué]',
+      })) : p.prescription_items
+    })) : consultation.prescriptions
+  };
+};
+
 export const getAllConsultations = async (req, res, next) => {
   try {
     const { patient_id, medecin_id } = req.query;
@@ -25,7 +48,9 @@ export const getAllConsultations = async (req, res, next) => {
       return res.status(500).json({ error: 'Erreur lors de la récupération des consultations', details: error.message });
     }
 
-    res.json({ consultations });
+    const result = (consultations || []).map((c) => maskMedicalSecrecy(c, req.user?.role));
+
+    res.json({ consultations: result });
   } catch (err) {
     next(err);
   }
@@ -60,7 +85,9 @@ export const getConsultationById = async (req, res, next) => {
       return res.status(404).json({ error: 'Consultation non trouvée' });
     }
 
-    res.json({ consultation });
+    const result = maskMedicalSecrecy(consultation, req.user?.role);
+
+    res.json({ consultation: result });
   } catch (err) {
     next(err);
   }

@@ -38,11 +38,11 @@ export const appointmentSchema = z.object({
   date_heure: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: 'Date et heure invalides',
   }),
-  statut: z.enum(['planifie', 'en_cours', 'honore', 'annule']).default('planifie'),
+  statut: z.enum(['planifie', 'en_attente', 'en_cours', 'honore', 'annule']).default('planifie'),
 });
 
 export const appointmentStatusSchema = z.object({
-  statut: z.enum(['planifie', 'en_cours', 'honore', 'annule']),
+  statut: z.enum(['planifie', 'en_attente', 'en_cours', 'honore', 'annule']),
 });
 
 export const consultationSchema = z.object({
@@ -67,4 +67,38 @@ export const prescriptionSchema = z.object({
   consultation_id: z.string().uuid('ID Consultation invalide'),
   statut: z.enum(['en_cours', 'delivree', 'annulee']).default('en_cours'),
   items: z.array(prescriptionItemSchema).optional().default([]),
+});
+
+export const vitalsSchema = z.object({
+  patient_id: z.string().uuid('ID Patient invalide'),
+  consultation_id: z.string().uuid().optional().nullable(),
+  ta_systolique: z.number().int().positive().optional().nullable(),
+  ta_diastolique: z.number().int().positive().optional().nullable(),
+  temperature: z.number().positive().optional().nullable(),
+  poids: z.number().positive().optional().nullable(),
+  taille: z.number().positive().optional().nullable(),
+  frequence_cardiaque: z.number().int().positive().optional().nullable(),
+  glycemie: z.number().nonnegative().optional().nullable(),
+  notes: z.string().optional().nullable(),
+});
+
+export const invoiceItemSchema = z.object({
+  description: z.string().min(1, 'La description est requise'),
+  quantite: z.number().int().positive().default(1),
+  prix_unitaire: z.number().nonnegative('Le prix unitaire doit être positif'),
+});
+
+export const invoiceCreateSchema = z.object({
+  patient_id: z.string().uuid('ID Patient invalide'),
+  consultation_id: z.string().uuid().optional().nullable(),
+  items: z.array(invoiceItemSchema).min(1, 'Au moins un article de facturation est requis'),
+});
+
+export const paymentCreateSchema = z.object({
+  invoice_id: z.string().uuid('ID Facture invalide'),
+  montant: z.number().positive('Le montant doit être supérieur à zéro'),
+  mode_paiement: z.enum(['especes', 'carte', 'mobile_money', 'virement'], {
+    errorMap: () => ({ message: 'Mode de paiement invalide (especes, carte, mobile_money, virement)' }),
+  }),
+  reference_transaction: z.string().optional().nullable(),
 });
