@@ -1,3 +1,17 @@
+/**
+ * ==============================================================================
+ * ROUTES FACTURATION ET PAIEMENTS (server/src/routes/billing.routes.js)
+ * ==============================================================================
+ * Rôle : Gère l'émission des factures, le suivi des impayés et les encaissements de règlements.
+ * 
+ * Endpoints :
+ *  - POST /api/invoices        : Créer une nouvelle facture (`FAC-YYYY-XXXX`)
+ *  - GET  /api/invoices        : Lister les factures (filtrable par patient/statut)
+ *  - GET  /api/invoices/:id/pdf: Générer le document PDF de la facture/reçu
+ *  - GET  /api/invoices/:id    : Détails d'une facture et règlements
+ *  - POST /api/payments        : Enregistrer un paiement et émettre une quittance (`RECU-XXXX`)
+ */
+
 import { Router } from 'express';
 import { authenticateJWT } from '../middleware/auth.middleware.js';
 import { authorizeRoles } from '../middleware/rbac.middleware.js';

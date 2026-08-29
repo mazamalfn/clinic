@@ -1,14 +1,24 @@
+/**
+ * ==============================================================================
+ * MIDDLEWARE DE JOURNALISATION ET D'AUDIT DE SÉCURITÉ (server/src/middleware/audit.middleware.js)
+ * ==============================================================================
+ * Rôle : Enregistre de manière asynchrone dans la table `audit_logs` toutes les actions
+ * critiques effectuées par les utilisateurs (ex: modification de statut, création de paiement, etc.).
+ * 
+ * L'enregistrement s'effectue en arrière-plan sans ralentir la réponse HTTP envoyée au client.
+ */
+
 import { supabase } from '../config/supabase.js';
 
 export const logAudit = (action, resource) => {
   return async (req, res, next) => {
-    // Intercepter la fin de la réponse pour capturer l'ID de la ressource ou les détails
+    // Intercepte la méthode res.json pour capturer l'ID de la ressource créée/modifiée
     const originalJson = res.json;
 
     res.json = function (body) {
-      res.json = originalJson; // Restore
+      res.json = originalJson; // Restaure la méthode d'origine
 
-      // Log async in background without blocking response
+      // Traitement asynchrone en arrière-plan
       (async () => {
         try {
           const userId = req.user?.id || null;

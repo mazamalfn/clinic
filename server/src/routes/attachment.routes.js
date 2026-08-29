@@ -1,3 +1,15 @@
+/**
+ * ==============================================================================
+ * ROUTES GESTION ÉLECTRONIQUE DE DOCUMENTS / GED (server/src/routes/attachment.routes.js)
+ * ==============================================================================
+ * Rôle : Gère le téléversement de documents médicaux (Multer), radio, résultats d'analyses.
+ * 
+ * Endpoints :
+ *  - POST   /api/attachments                    : Téléverser une pièce jointe (max 10MB)
+ *  - GET    /api/attachments/patient/:patientId : Consulter la GED d'un patient
+ *  - DELETE /api/attachments/:id                : Supprimer une pièce jointe (Médecin/Admin)
+ */
+
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -7,11 +19,13 @@ import { authorizeRoles } from '../middleware/rbac.middleware.js';
 import { logAudit } from '../middleware/audit.middleware.js';
 import { uploadAttachment, getPatientAttachments, deleteAttachment } from '../controllers/attachment.controller.js';
 
+// Création automatique du répertoire /uploads s'il n'existe pas
 const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Configuration du stockage de fichiers disque Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -22,7 +36,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Max 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite fixée à 10 Mo par fichier
 });
 
 const router = Router();

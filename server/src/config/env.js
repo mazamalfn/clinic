@@ -1,3 +1,11 @@
+/**
+ * ==============================================================================
+ * CONFIGURATION DES VARIABLES D'ENVIRONNEMENT (server/src/config/env.js)
+ * ==============================================================================
+ * Rôle : Charge le fichier `.env` et exporte un objet d'environnement centralisé
+ * avec des valeurs par défaut pour sécuriser l'exécution de l'application.
+ */
+
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -5,8 +13,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Chargement des variables depuis le fichier .env situé à la racine du dossier /server
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+/**
+ * Objet d'environnement global exporté
+ */
 export const env = {
   PORT: process.env.PORT || 5000,
   NODE_ENV: process.env.NODE_ENV || 'development',

@@ -1,9 +1,22 @@
+/**
+ * ==============================================================================
+ * APPLICATION EXPRESS BACKEND (server/src/app.js)
+ * ==============================================================================
+ * Rôle : Ce fichier configure le serveur Express.js.
+ * Il associe :
+ *  1. Les middlewares globaux (sécurité, gestion CORS, parsing du JSON, logs HTTP)
+ *  2. Le dossier statique pour les pièces jointes (GED)
+ *  3. Les modules de routage (/api/auth, /api/patients, /api/appointments, etc.)
+ *  4. La gestion globale des erreurs (404 Not Found et erreurs 500)
+ */
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 
+// Import des routes de l'application
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import patientRoutes from './routes/patient.routes.js';
@@ -15,21 +28,34 @@ import vitalsRoutes from './routes/vitals.routes.js';
 import billingRoutes from './routes/billing.routes.js';
 import attachmentRoutes from './routes/attachment.routes.js';
 
+// Import du gestionnaire d'erreurs centralisé
 import { errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
 
-// Middlewares de sécurité et de journalisation
+// ------------------------------------------------------------------------------
+// MIDDLEWARES GLOBAUX
+// ------------------------------------------------------------------------------
+// Helmet : Sécurise les en-têtes HTTP contre les attaques XSS et d'injection
 app.use(helmet());
+// CORS : Autorise les requêtes cross-origin depuis le client Web (Vite/React)
 app.use(cors());
+// Express JSON : Analyse le corps des requêtes entrantes au format JSON
 app.use(express.json());
+// URL-encoded : Analyse les données transmises par formulaires HTML
 app.use(express.urlencoded({ extended: true }));
+// Morgan : Journalise toutes les requêtes HTTP reçues dans la console de débug
 app.use(morgan('dev'));
 
-// Static folder pour les pièces jointes GED
+// ------------------------------------------------------------------------------
+// DOSSIERS STATIQUES
+// ------------------------------------------------------------------------------
+// Sert le répertoire des fichiers téléversés (GED - pièces jointes médicales)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// Route de santé API
+// ------------------------------------------------------------------------------
+// ROUTE DE SANTÉ DE L'API (Health Check)
+// ------------------------------------------------------------------------------
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -38,19 +64,23 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Enregistrement des routes d'API
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/consultations', consultationRoutes);
-app.use('/api/prescriptions', prescriptionRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/vitals', vitalsRoutes);
-app.use('/api', billingRoutes); // Expose /api/invoices et /api/payments
-app.use('/api/attachments', attachmentRoutes);
+// ------------------------------------------------------------------------------
+// ENREGISTREMENT DES ROUTES D'API
+// ------------------------------------------------------------------------------
+app.use('/api/auth', authRoutes);           // Connexion, profil utilisateur
+app.use('/api/users', userRoutes);           // Gestion des utilisateurs (Admin)
+app.use('/api/patients', patientRoutes);     // Dossiers et historique patients
+app.use('/api/appointments', appointmentRoutes); // Gestion des rendez-vous et file d'attente
+app.use('/api/consultations', consultationRoutes); // Consultations médicales et secret médical
+app.use('/api/prescriptions', prescriptionRoutes); // Ordonnances et médicaments
+app.use('/api/dashboard', dashboardRoutes);   // Métriques et agrégations du tableau de bord
+app.use('/api/vitals', vitalsRoutes);       // Prise de constantes et alerte IMC/Tension
+app.use('/api', billingRoutes);              // Facturation et quittances (/invoices, /payments)
+app.use('/api/attachments', attachmentRoutes); // Pièces jointes et GED médicale
 
-// Gestionnaire 404 (Route non trouvée)
+// ------------------------------------------------------------------------------
+// GESTION DES ROUTES INEXISTANTES (404) ET ERREURS CENTRALISÉES
+// ------------------------------------------------------------------------------
 app.use((req, res) => {
   res.status(404).json({
     error: 'Non trouvé',
@@ -58,7 +88,7 @@ app.use((req, res) => {
   });
 });
 
-// Middleware d'erreur global
+// Middleware d'erreur global (attrape toutes les erreurs passées à next(err))
 app.use(errorHandler);
 
 export default app;

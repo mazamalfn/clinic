@@ -1,3 +1,15 @@
+/**
+ * ==============================================================================
+ * ROUTES CONSTANTES VITALES ET SUIVI MÉDICAL (server/src/routes/vitals.routes.js)
+ * ==============================================================================
+ * Rôle : Gère l'enregistrement et l'historique des constantes physiques (poids, taille, tension, température, etc.).
+ * 
+ * Endpoints :
+ *  - POST /api/vitals                           : Prise de constantes (avec calcul IMC et alerte automatique)
+ *  - GET  /api/vitals/patient/:patientId        : Historique des constantes d'un patient
+ *  - GET  /api/vitals/consultation/:consultationId : Constantes d'une consultation spécifique
+ */
+
 import { Router } from 'express';
 import { authenticateJWT } from '../middleware/auth.middleware.js';
 import { authorizeRoles } from '../middleware/rbac.middleware.js';

@@ -1,10 +1,22 @@
+/**
+ * ==============================================================================
+ * SCHÉMAS DE VALIDATION ZOD DE L'API (server/src/validators/schemas.js)
+ * ==============================================================================
+ * Rôle : Définit les contrats d'entrée (types et contraintes de validation)
+ * pour toutes les données envoyées par le client via le body HTTP.
+ * 
+ * Avantage : Empêche toute injection ou donnée corrompue d'atteindre la base de données.
+ */
+
 import { z } from 'zod';
 
+/** Schéma de validation pour la connexion */
 export const loginSchema = z.object({
   email: z.string().email('Format email invalide'),
   mot_de_passe: z.string().min(1, 'Le mot de passe est requis'),
 });
 
+/** Schéma de création d'un utilisateur */
 export const userCreateSchema = z.object({
   nom: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Format email invalide'),
@@ -14,6 +26,7 @@ export const userCreateSchema = z.object({
   }),
 });
 
+/** Schéma de mise à jour d'un utilisateur */
 export const userUpdateSchema = z.object({
   nom: z.string().min(2).optional(),
   email: z.string().email().optional(),
@@ -21,6 +34,7 @@ export const userUpdateSchema = z.object({
   role: z.enum(['admin', 'medecin', 'secretaire']).optional(),
 });
 
+/** Schéma d'enregistrement d'un patient */
 export const patientSchema = z.object({
   nom: z.string().min(1, 'Le nom est requis'),
   prenom: z.string().min(1, 'Le prénom est requis'),
@@ -32,6 +46,7 @@ export const patientSchema = z.object({
   antecedents: z.string().optional().nullable(),
 });
 
+/** Schéma de réservation de rendez-vous */
 export const appointmentSchema = z.object({
   patient_id: z.string().uuid('ID Patient invalide'),
   medecin_id: z.string().uuid('ID Médecin invalide'),
@@ -41,10 +56,12 @@ export const appointmentSchema = z.object({
   statut: z.enum(['planifie', 'en_attente', 'en_cours', 'honore', 'annule']).default('planifie'),
 });
 
+/** Schéma de changement de statut de rendez-vous */
 export const appointmentStatusSchema = z.object({
   statut: z.enum(['planifie', 'en_attente', 'en_cours', 'honore', 'annule']),
 });
 
+/** Schéma de saisie d'une consultation */
 export const consultationSchema = z.object({
   patient_id: z.string().uuid('ID Patient invalide'),
   medecin_id: z.string().uuid('ID Médecin invalide'),
@@ -56,6 +73,7 @@ export const consultationSchema = z.object({
   notes: z.string().optional().nullable(),
 });
 
+/** Ligne de médicament dans une ordonnance */
 export const prescriptionItemSchema = z.object({
   medicament: z.string().min(1, 'Le nom du médicament est requis'),
   dosage: z.string().min(1, 'Le dosage est requis'),
@@ -63,12 +81,14 @@ export const prescriptionItemSchema = z.object({
   duree: z.string().min(1, 'La durée est requise'),
 });
 
+/** Schéma de création d'ordonnance */
 export const prescriptionSchema = z.object({
   consultation_id: z.string().uuid('ID Consultation invalide'),
   statut: z.enum(['en_cours', 'delivree', 'annulee']).default('en_cours'),
   items: z.array(prescriptionItemSchema).optional().default([]),
 });
 
+/** Schéma de prise des constantes vitales */
 export const vitalsSchema = z.object({
   patient_id: z.string().uuid('ID Patient invalide'),
   consultation_id: z.string().uuid().optional().nullable(),
@@ -82,18 +102,21 @@ export const vitalsSchema = z.object({
   notes: z.string().optional().nullable(),
 });
 
+/** Ligne d'acte facturé */
 export const invoiceItemSchema = z.object({
   description: z.string().min(1, 'La description est requise'),
   quantite: z.number().int().positive().default(1),
   prix_unitaire: z.number().nonnegative('Le prix unitaire doit être positif'),
 });
 
+/** Schéma de création de facture */
 export const invoiceCreateSchema = z.object({
   patient_id: z.string().uuid('ID Patient invalide'),
   consultation_id: z.string().uuid().optional().nullable(),
   items: z.array(invoiceItemSchema).min(1, 'Au moins un article de facturation est requis'),
 });
 
+/** Schéma d'encaissement de paiement */
 export const paymentCreateSchema = z.object({
   invoice_id: z.string().uuid('ID Facture invalide'),
   montant: z.number().positive('Le montant doit être supérieur à zéro'),

@@ -1,21 +1,9 @@
-import bcrypt from 'bcryptjs';
-import { supabase } from '../config/supabase.js';
+import { UserService } from '../services/index.js';
 
 export const getAllUsers = async (req, res, next) => {
   try {
     const { role } = req.query;
-
-    let query = supabase.from('users').select('id, nom, email, role, created_at, updated_at');
-    if (role) {
-      query = query.eq('role', role);
-    }
-
-    const { data: users, error } = await query.order('nom', { ascending: true });
-
-    if (error) {
-      return res.status(500).json({ error: 'Erreur lors de la récupération des utilisateurs', details: error.message });
-    }
-
+    const users = await UserService.getAllUsers(role);
     res.json({ users });
   } catch (err) {
     next(err);
@@ -25,14 +13,9 @@ export const getAllUsers = async (req, res, next) => {
 export const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const user = await UserService.getUserById(id);
 
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('id, nom, email, role, created_at, updated_at')
-      .eq('id', id)
-      .single();
-
-    if (error || !user) {
+    if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
 
@@ -44,35 +27,15 @@ export const getUserById = async (req, res, next) => {
 
 export const createUser = async (req, res, next) => {
   try {
-    const { nom, email, mot_de_passe, role } = req.body;
-
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'Un utilisateur existe déjà avec cet email.' });
-    }
-
-    const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
-
-    const { data: newUser, error } = await supabase
-      .from('users')
-      .insert([{ nom, email, mot_de_passe: hashedPassword, role }])
-      .select('id, nom, email, role, created_at')
-      .single();
-
-    if (error) {
-      return res.status(500).json({ error: 'Échec de la création de l\'utilisateur', details: error.message });
-    }
-
+    const newUser = await UserService.createUser(req.body);
     res.status(201).json({
       message: 'Utilisateur créé avec succès',
       user: newUser,
     });
   } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
     next(err);
   }
 };
@@ -80,27 +43,7 @@ export const createUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { nom, email, mot_de_passe, role } = req.body;
-
-    const updateFields = {};
-    if (nom) updateFields.nom = nom;
-    if (email) updateFields.email = email;
-    if (role) updateFields.role = role;
-    if (mot_de_passe) {
-      updateFields.mot_de_passe = await bcrypt.hash(mot_de_passe, 10);
-    }
-
-    const { data: updatedUser, error } = await supabase
-      .from('users')
-      .update(updateFields)
-      .eq('id', id)
-      .select('id, nom, email, role, updated_at')
-      .single();
-
-    if (error) {
-      return res.status(500).json({ error: 'Erreur de mise à jour', details: error.message });
-    }
-
+    const updatedUser = await UserService.updateUser(id, req.body);
     res.json({
       message: 'Utilisateur mis à jour avec succès',
       user: updatedUser,
@@ -113,19 +56,12 @@ export const updateUser = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    if (id === req.user.id) {
-      return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte.' });
-    }
-
-    const { error } = await supabase.from('users').delete().eq('id', id);
-
-    if (error) {
-      return res.status(500).json({ error: 'Erreur lors de la suppression', details: error.message });
-    }
-
+    await UserService.deleteUser(id, req.user.id);
     res.json({ message: 'Utilisateur supprimé avec succès' });
   } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
     next(err);
   }
 };

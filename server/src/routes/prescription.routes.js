@@ -1,3 +1,18 @@
+/**
+ * ==============================================================================
+ * ROUTES ORDONNANCES ET IMPRESSION PDF (server/src/routes/prescription.routes.js)
+ * ==============================================================================
+ * Rôle : Gère les prescriptions médicales et l'export PDF prêt à imprimer.
+ * 
+ * Endpoints :
+ *  - GET   /api/prescriptions          : Liste des ordonnances
+ *  - GET   /api/prescriptions/:id/pdf  : Télécharger le PDF officiel de l'ordonnance (PDFKit)
+ *  - GET   /api/prescriptions/:id      : Détails d'une ordonnance et médicaments
+ *  - POST  /api/prescriptions          : Créer une nouvelle ordonnance avec médicaments
+ *  - PATCH /api/prescriptions/:id/statut : Changer le statut (en_cours, delivree, annulee)
+ *  - DELETE /api/prescriptions/:id     : Supprimer une ordonnance
+ */
+
 import { Router } from 'express';
 import {
   getAllPrescriptions,

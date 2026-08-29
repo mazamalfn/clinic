@@ -1,6 +1,17 @@
+/**
+ * ==============================================================================
+ * CONTRÔLEUR DE GÉNÉRATION ET TÉLÉCHARGEMENT PDF (server/src/controllers/pdf.controller.js)
+ * ==============================================================================
+ * Rôle : Gère le flux HTTP pour l'export en direct des documents PDF (Ordonnances médicales et Factures/Quittances).
+ * Définit les en-têtes HTTP de type `application/pdf` pour l'ouverture en ligne (`inline`) ou l'impression.
+ */
+
 import { supabase } from '../config/supabase.js';
 import { generatePrescriptionPDF, generateInvoicePDF } from '../services/pdf.service.js';
 
+/**
+ * Endpoint de téléversement/visualisation du PDF d'ordonnance
+ */
 export const downloadPrescriptionPDF = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -24,6 +35,9 @@ export const downloadPrescriptionPDF = async (req, res, next) => {
   }
 };
 
+/**
+ * Endpoint de téléversement/visualisation du PDF de facture ou reçu
+ */
 export const downloadInvoicePDF = async (req, res, next) => {
   try {
     const { id } = req.params;

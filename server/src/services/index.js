@@ -1,0 +1,12 @@
+export { AuthService } from './auth.service.js';
+export { UserService } from './user.service.js';
+export { PatientService } from './patient.service.js';
+export { AppointmentService } from './appointment.service.js';
+export { ConsultationService } from './consultation.service.js';
+export { PrescriptionService } from './prescription.service.js';
+export { BillingService } from './billing.service.js';
+export { VitalsService } from './vitals.service.js';
+export { AttachmentService } from './attachment.service.js';
+export { DashboardService } from './dashboard.service.js';
+export { NotificationService } from './notification.service.js';
+export { pdfService } from './pdf.service.js';

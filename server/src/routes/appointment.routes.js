@@ -1,3 +1,20 @@
+/**
+ * ==============================================================================
+ * ROUTES RENDEZ-VOUS ET FILE D'ATTENTE (server/src/routes/appointment.routes.js)
+ * ==============================================================================
+ * Rôle : Gère le calendrier de rendez-vous, la détection des conflits de créneau
+ * et le suivi de la file d'attente en temps réel du cabinet.
+ * 
+ * Endpoints :
+ *  - GET    /api/appointments          : Liste tous les rendez-vous (filtres date/statut/médecin)
+ *  - GET    /api/appointments/queue    : File d'attente du jour (en_attente, en_cours, planifie)
+ *  - GET    /api/appointments/:id      : Détails d'un rendez-vous
+ *  - POST   /api/appointments          : Planifier un nouveau rendez-vous (avec notification)
+ *  - PUT    /api/appointments/:id      : Modifier les détails d'un rendez-vous
+ *  - PATCH  /api/appointments/:id/statut : Changer le statut (en_attente, consulte, annule)
+ *  - DELETE /api/appointments/:id      : Annuler/Supprimer un rendez-vous
+ */
+
 import { Router } from 'express';
 import {
   getAllAppointments,

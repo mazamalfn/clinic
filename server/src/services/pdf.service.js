@@ -1,8 +1,16 @@
+/**
+ * ==============================================================================
+ * SERVICE DE GÉNÉRATION DE DOCUMENTS PDF (server/src/services/pdf.service.js)
+ * ==============================================================================
+ * Rôle : Génère des fichiers PDF à la volée pour l'impression des ordonnances et factures.
+ * Utilise `pdfkit` si la librairie est disponible avec un moteur de fallback en Javascript pur (Pure JS PDF stream)
+ * garantissant que la génération PDF ne plante jamais même sans binaire natif.
+ */
+
 import fs from 'fs';
 
 /**
- * Créateur de PDF minimaliste sans dépendance externe (Pure JS)
- * en cas d'absence de la librairie pdfkit
+ * Moteur de génération PDF en Pure JS (Fallback universel sans dépendance externe)
  */
 const generatePureJSPDF = (title, headerInfo, items, totals, stream) => {
   const sanitize = (str) => (str || '').replace(/[()\\]/g, '\\$&');
@@ -81,7 +89,7 @@ const generatePureJSPDF = (title, headerInfo, items, totals, stream) => {
 };
 
 /**
- * Générer le PDF d'une Ordonnance Médicale
+ * Générer le document PDF d'une Ordonnance Médicale
  */
 export const generatePrescriptionPDF = async (prescriptionData, stream) => {
   try {
@@ -155,7 +163,7 @@ export const generatePrescriptionPDF = async (prescriptionData, stream) => {
 };
 
 /**
- * Générer le PDF d'une Facture / Quittance de Paiement
+ * Générer le document PDF d'une Facture / Quittance de Paiement
  */
 export const generateInvoicePDF = async (invoiceData, stream) => {
   try {
